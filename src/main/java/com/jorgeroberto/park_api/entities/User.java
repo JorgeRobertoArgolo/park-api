@@ -56,7 +56,7 @@ public class User implements Serializable {
     // Papel do usuário (enum). Armazenado como texto no banco.
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 25)
-    private Role role;
+    private Role role = Role.ROLE_CUSTOMER;
 
     // Data/hora em que o usuário foi criado
     @Column(name = "created_at")
