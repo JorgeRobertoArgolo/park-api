@@ -6,8 +6,10 @@ import com.jorgeroberto.park_api.exceptions.UsernameUniqueViolationException;
 import com.jorgeroberto.park_api.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,13 +39,13 @@ public class UserService {
     @Transactional
     public User updatePassword(Long id, String currentPassword, String newPassword, String confirmNewPassword) {
         if (!newPassword.equals(confirmNewPassword)) {
-            throw new RuntimeException("Nova senha não condiz com confirmação de senha!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nova senha não condiz com confirmação de senha!");
         }
 
         User user = findById(id);
 
         if (!user.getPassword().equals(currentPassword)) {
-            throw new RuntimeException("Senha atual não condiz com senha informada!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Senha atual não condiz com senha informada!");
         }
 
         user.setPassword(newPassword);
