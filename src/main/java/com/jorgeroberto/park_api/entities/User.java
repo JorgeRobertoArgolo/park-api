@@ -2,6 +2,11 @@ package com.jorgeroberto.park_api.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 import java.io.Serializable;
@@ -37,6 +42,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) //Apenas o campo "id" será usado para equals/hashCode
 @ToString(onlyExplicitlyIncluded = true) //Apenas o campo "id" será exibido no toString()
+@EntityListeners(AuditingEntityListener.class) //auditoria
 public class User implements Serializable {
 
     @Id
@@ -59,18 +65,22 @@ public class User implements Serializable {
     private Role role = Role.ROLE_CUSTOMER;
 
     // Data/hora em que o usuário foi criado
+    @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     // Data/hora da última atualização no usuário
+    @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Usuário responsável pela criação
+    @CreatedBy
     @Column(name = "created_by")
     private String createdBy;
 
     // Usuário responsável pela última atualização
+    @LastModifiedBy
     @Column(name = "updated_by")
     private String updatedBy;
 
