@@ -2,6 +2,7 @@ package com.jorgeroberto.park_api.services;
 
 import com.jorgeroberto.park_api.entities.User;
 import com.jorgeroberto.park_api.exceptions.EntityNotFoundException;
+import com.jorgeroberto.park_api.exceptions.PasswordInvalidException;
 import com.jorgeroberto.park_api.exceptions.UsernameUniqueViolationException;
 import com.jorgeroberto.park_api.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,17 +44,16 @@ public class UserService {
     public User updatePassword(Long id, String currentPassword, String newPassword, String confirmNewPassword) {
 
         if (!newPassword.equals(confirmNewPassword)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nova senha não condiz com confirmação de senha!");
+            throw new PasswordInvalidException("Nova senha não confere com confirmação de senha.");
         }
 
         User user = findById(id);
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Senha atual não condiz com senha informada!");
+            throw new PasswordInvalidException("Nova senha não confere com confirmação de senha.");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setPassword(newPassword);
         return user;
     }
 

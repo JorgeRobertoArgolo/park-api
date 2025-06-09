@@ -1,6 +1,7 @@
 package com.jorgeroberto.park_api.web.exceptions;
 
 import com.jorgeroberto.park_api.exceptions.EntityNotFoundException;
+import com.jorgeroberto.park_api.exceptions.PasswordInvalidException;
 import com.jorgeroberto.park_api.exceptions.UsernameUniqueViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,15 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ErrorMessage(request, HttpStatus.FORBIDDEN, ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordInvalidException.class)
+    public ResponseEntity<ErrorMessage> passwordInvalidException(RuntimeException ex, HttpServletRequest request) {
+        log.error("Api Error - ", ex);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ErrorMessage(request, HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
