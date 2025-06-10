@@ -143,9 +143,13 @@ public class UserIT {
 
     @Test
     public void findUser_WithExistingId_ReturnsUserWithStatus200 () {
+        /*ADMIN buscando ele mesmo*/
         UserResponseDto responseBody = testClient.
                 get()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(
+                        testClient, "ana@email.com", "123456"
+                ))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(UserResponseDto.class)
@@ -155,6 +159,40 @@ public class UserIT {
         Assertions.assertThat(responseBody.getId()).isEqualTo(100);
         Assertions.assertThat(responseBody.getUsername()).isEqualTo("ana@email.com");
         Assertions.assertThat(responseBody.getRole()).isEqualTo("ADMIN");
+
+        /*ADMIN buscando outro*/
+        responseBody = testClient.
+                get()
+                .uri("api/v1/users/101")
+                .headers(JwtAuthentication.getHeaderAuthorization(
+                        testClient, "ana@email.com", "123456"
+                ))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserResponseDto.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getId()).isEqualTo(101);
+        Assertions.assertThat(responseBody.getUsername()).isEqualTo("jorge@email.com");
+        Assertions.assertThat(responseBody.getRole()).isEqualTo("CUSTOMER");
+
+        /*CUSTOMER buscando ele mesmo*/
+        responseBody = testClient.
+                get()
+                .uri("api/v1/users/101")
+                .headers(JwtAuthentication.getHeaderAuthorization(
+                        testClient, "jorge@email.com", "123456"
+                ))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserResponseDto.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getId()).isEqualTo(101);
+        Assertions.assertThat(responseBody.getUsername()).isEqualTo("jorge@email.com");
+        Assertions.assertThat(responseBody.getRole()).isEqualTo("CUSTOMER");
     }
 
     @Test
@@ -230,6 +268,7 @@ public class UserIT {
         ErrorMessage responseBody = testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("123", "1236", "1456"))
                 .exchange()
@@ -243,6 +282,7 @@ public class UserIT {
         responseBody = testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("12345", "12345", "12345"))
                 .exchange()
@@ -256,6 +296,7 @@ public class UserIT {
         responseBody = testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("12345678", "12345678", "12345678"))
                 .exchange()
@@ -272,6 +313,7 @@ public class UserIT {
         ErrorMessage responseBody = testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("123456", "123456", "000000"))
                 .exchange()
@@ -286,6 +328,7 @@ public class UserIT {
         responseBody = testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("000000", "123456", "123456"))
                 .exchange()
@@ -302,6 +345,7 @@ public class UserIT {
         List<UserResponseDto> responseBody = testClient.
                  get()
                 .uri("api/v1/users")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(UserResponseDto.class)
@@ -314,5 +358,21 @@ public class UserIT {
         Assertions.assertThat(user.getId()).isEqualTo(100);
         Assertions.assertThat(user.getUsername()).isEqualTo("ana@email.com");
         Assertions.assertThat(user.getRole()).isEqualTo("ADMIN");
+    }
+
+    //Está retornando 401 -> erro no teste
+    @Test
+    public void findUsers_WithUserWithoutPermissions_ReturnsErrorMessageWithStatus403() {
+        ErrorMessage responseBody = testClient.
+                get()
+                .uri("api/v1/users")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "jorge@email.com", "123456"))
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody(ErrorMessage.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getStatus()).isEqualTo(403);
     }
 }

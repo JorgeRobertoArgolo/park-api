@@ -17,10 +17,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j
+@RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUserDetailsService detailsService;
+    private final JwtUserDetailsService detailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

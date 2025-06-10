@@ -2,6 +2,7 @@ package com.jorgeroberto.park_api.config;
 
 import com.jorgeroberto.park_api.jwt.JwtAuthenticationEntryPoint;
 import com.jorgeroberto.park_api.jwt.JwtAuthorizationFilter;
+import com.jorgeroberto.park_api.jwt.JwtUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,7 +31,7 @@ public class SpringSecurityConfig {
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthorizationFilter jwtAuthorizationFilter) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable()) //informa para não esperar um form de login
@@ -43,16 +44,17 @@ public class SpringSecurityConfig {
                 ).sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 ).addFilterBefore(
-                    jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class
+                    jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class
                 ).exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 ).build();
     }
 
     @Bean
-    public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter();
+    public JwtAuthorizationFilter jwtAuthorizationFilter(JwtUserDetailsService detailsService) {
+        return new JwtAuthorizationFilter(detailsService);
     }
+
 
     //tipo de criptografia
     @Bean
