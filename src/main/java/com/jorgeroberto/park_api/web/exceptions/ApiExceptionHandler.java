@@ -1,5 +1,6 @@
 package com.jorgeroberto.park_api.web.exceptions;
 
+import com.jorgeroberto.park_api.exceptions.CpfUniqueViolationException;
 import com.jorgeroberto.park_api.exceptions.EntityNotFoundException;
 import com.jorgeroberto.park_api.exceptions.PasswordInvalidException;
 import com.jorgeroberto.park_api.exceptions.UsernameUniqueViolationException;
@@ -44,7 +45,7 @@ public class ApiExceptionHandler {
                 .body(new ErrorMessage(request, HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 
-    @ExceptionHandler(UsernameUniqueViolationException.class)
+    @ExceptionHandler({UsernameUniqueViolationException.class, CpfUniqueViolationException.class})
     public ResponseEntity<ErrorMessage> uniqueViolationException(RuntimeException ex, HttpServletRequest request) {
         log.error("Api Error : ", ex);
         return ResponseEntity.status(HttpStatus.CONFLICT)
