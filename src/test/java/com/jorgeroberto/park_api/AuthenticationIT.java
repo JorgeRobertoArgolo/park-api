@@ -1,10 +1,7 @@
 package com.jorgeroberto.park_api;
 
 import com.jorgeroberto.park_api.jwt.JwtToken;
-import com.jorgeroberto.park_api.web.dto.UserCreateDto;
 import com.jorgeroberto.park_api.web.dto.UserLoginDto;
-import com.jorgeroberto.park_api.web.dto.UserPasswordDto;
-import com.jorgeroberto.park_api.web.dto.UserResponseDto;
 import com.jorgeroberto.park_api.web.exceptions.ErrorMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,7 @@ public class AuthenticationIT {
 
     @Autowired
     WebTestClient testClient;
-
+    //Correto
     @Test
     public void authenticate_WithValidCredentials_ReturnTokenWithStatus200() {
         JwtToken responseBody = testClient
@@ -36,7 +33,7 @@ public class AuthenticationIT {
 
         Assertions.assertThat(responseBody).isNotNull();
     }
-
+    //Correto
     @Test
     public void authenticate_WithInvalidCredentials_ReturnErrorMessageWithStatus400() {
         ErrorMessage responseBody = testClient
@@ -65,7 +62,7 @@ public class AuthenticationIT {
         Assertions.assertThat(responseBody).isNotNull();
         Assertions.assertThat(responseBody.getStatus()).isEqualTo(400);
     }
-
+    //Correto
     @Test
     public void authenticate_WithInvalidUsername_ReturnErrorMessageWithStatus422() {
         ErrorMessage responseBody = testClient
@@ -94,7 +91,7 @@ public class AuthenticationIT {
         Assertions.assertThat(responseBody).isNotNull();
         Assertions.assertThat(responseBody.getStatus()).isEqualTo(422);
     }
-
+    //Correto
     @Test
     public void authenticate_WithInvalidPassword_ReturnErrorMessageWithStatus422() {
         ErrorMessage responseBody = testClient

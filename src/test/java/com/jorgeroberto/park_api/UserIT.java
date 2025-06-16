@@ -200,6 +200,9 @@ public class UserIT {
         ErrorMessage responseBody = testClient.
                 get()
                 .uri("api/v1/users/0")
+                .headers(JwtAuthentication.getHeaderAuthorization(
+                        testClient, "ana@email.com", "123456"
+                ))
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody(ErrorMessage.class)
@@ -214,6 +217,9 @@ public class UserIT {
         testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(
+                        testClient, "ana@email.com", "123456"
+                ))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("123456", "123456", "123456"))
                 .exchange()
@@ -221,12 +227,12 @@ public class UserIT {
     }
 
     @Test
-    public void editUser_WithNonExistingId_ReturnsUserWithStatus404 () {
+    public void findUser_WithNonExistingId_ReturnErrorMessageWithStatus404 () {
         ErrorMessage responseBody = testClient.
-                patch()
+                get()
                 .uri("api/v1/users/0")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new UserPasswordDto("123456", "123456", "123456"))
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody(ErrorMessage.class)
@@ -241,6 +247,7 @@ public class UserIT {
         testClient.
                 patch()
                 .uri("api/v1/users/100")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("123456", "123456", "123456"))
                 .exchange()
@@ -248,19 +255,34 @@ public class UserIT {
     }
 
     @Test
-    public void updatePassword_WithNonExistingId_ReturnStatus404 () {
+    public void updatePassword_WithDifferentUser_ReturnStatus403 () {
         ErrorMessage responseBody = testClient.
                 patch()
                 .uri("api/v1/users/0")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "ana@email.com", "123456"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new UserPasswordDto("123456", "123456", "123456"))
                 .exchange()
-                .expectStatus().isNotFound()
+                .expectStatus().isForbidden()
                 .expectBody(ErrorMessage.class)
                 .returnResult().getResponseBody();
-        ;
+
         Assertions.assertThat(responseBody).isNotNull();
-        Assertions.assertThat(responseBody.getStatus()).isEqualTo(404);
+        Assertions.assertThat(responseBody.getStatus()).isEqualTo(403);
+
+        responseBody = testClient.
+                patch()
+                .uri("api/v1/users/0")
+                .headers(JwtAuthentication.getHeaderAuthorization(testClient, "jorge@email.com", "123456"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new UserPasswordDto("123456", "123456", "123456"))
+                .exchange()
+                .expectStatus().isForbidden()
+                .expectBody(ErrorMessage.class)
+                .returnResult().getResponseBody();
+
+        Assertions.assertThat(responseBody).isNotNull();
+        Assertions.assertThat(responseBody.getStatus()).isEqualTo(403);
     }
 
     @Test

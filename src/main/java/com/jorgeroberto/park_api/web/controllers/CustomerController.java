@@ -13,10 +13,12 @@ import com.jorgeroberto.park_api.web.dto.mapper.PageableMapper;
 import com.jorgeroberto.park_api.web.exceptions.ErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,10 +29,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 import static io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY;
 
+@Tag(name = "Clientes", description = "Contém todas as opereções relativas ao recurso de um cliente")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/v1/customers")
@@ -43,17 +44,13 @@ public class CustomerController {
             security = @SecurityRequirement(name = "security"),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Recurso criado com sucesso",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = CustomerResponseDto.class))),
-                    @ApiResponse(responseCode = "403", description = "Recurso não permitido ao perfil ADMIN",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = CustomerResponseDto.class))),
-                    @ApiResponse(responseCode = "409", description = "CPF de cliente já cadastrado no sistema",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorMessage.class))),
-                    @ApiResponse(responseCode = "422", description = "Recurso não processado por dados de entrada inválidos",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorMessage.class)))
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = CustomerResponseDto.class))),
+                    @ApiResponse(responseCode = "409", description = "Cliente CPF já possui cadastro no sistema",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "422", description = "Recurso não processado por falta de dados ou dados inválidos",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "403", description = "Recurso não permito ao perfil de ADMIN",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class)))
             })
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -71,47 +68,44 @@ public class CustomerController {
             security = @SecurityRequirement(name = "security"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Recurso localizado com sucesso",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = CustomerResponseDto.class))),
-                    @ApiResponse(responseCode = "403", description = "Recurso não permitido ao perfil CUSTOMER",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = CustomerResponseDto.class))),
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = CustomerResponseDto.class))),
                     @ApiResponse(responseCode = "404", description = "Cliente não encontrado",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorMessage.class)))
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "403", description = "Recurso não permito ao perfil de CLIENTE",
+                            content = @Content(mediaType = " application/json;charset=UTF-8", schema = @Schema(implementation = ErrorMessage.class)))
             })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CustomerResponseDto> findById(@PathVariable Long id) {
         Customer customer = customerService.findById(id);
-        return ResponseEntity.status(200).body(CustomerMapper.toDto(customer));
+        return ResponseEntity.ok(CustomerMapper.toDto(customer));
     }
 
-    @Operation(summary = "Recuperar uma lista de clientes", description = "A Requisição exige o uso de Bearer Token " +
-            "e o Acesso é restrito ao role = ADMIN",
+    @Operation(summary = "Recuperar lista de clientes",
+            description = "Requisição exige uso de um bearer token. Acesso restrito a Role='ADMIN' ",
             security = @SecurityRequirement(name = "security"),
             parameters = {
-                @Parameter(in = QUERY, name = "page",
-                    content = @Content (schema = @Schema(type = "integer", defaultValue = "0")),
-                    description = "Representa a página retornada"
-                ),
-                @Parameter(in = QUERY, name = "size",
-                        content = @Content (schema = @Schema(type = "integer", defaultValue = "20")),
-                        description = "Representa o total de elementos por página"
-                ),
-                @Parameter(in = QUERY, name = "sort", hidden = true,
-                        content = @Content (schema = @Schema(type = "string", defaultValue = "id,asc")),
-                        description = "Representa a ordenação dos resultados. " +
-                                "Aceita múltiplos critérios de ordenação são suportados."
-                )
+                    @Parameter(in = QUERY, name = "page",
+                            content = @Content(schema = @Schema(type = "integer", defaultValue = "0")),
+                            description = "Representa a página retornada"
+                    ),
+                    @Parameter(in = QUERY, name = "size",
+                            content = @Content(schema = @Schema(type = "integer", defaultValue = "5")),
+                            description = "Representa o total de elementos por página"
+                    ),
+                    @Parameter(in = QUERY, name = "sort", hidden = true,
+                            array = @ArraySchema(schema = @Schema(type = "string", defaultValue = "nome,asc")),
+                            description = "Representa a ordenação dos resultados. Aceita multiplos critérios de ordenação são suportados.")
             },
             responses = {
-                @ApiResponse(responseCode = "200", description = "Recurso recuperado com sucesso",
-                        content = @Content(mediaType = "application/json",
-                                schema = @Schema(implementation = CustomerResponseDto.class))),
-                @ApiResponse(responseCode = "403", description = "Recurso não permitido ao perfil CUSTOMER",
-                        content = @Content(mediaType = "application/json",
-                                schema = @Schema(implementation = ErrorMessage.class)))
+                    @ApiResponse(responseCode = "200", description = "Recurso recuperado com sucesso",
+                            content = @Content(mediaType = " application/json;charset=UTF-8",
+                                    schema = @Schema(implementation = CustomerResponseDto.class))
+                    ),
+                    @ApiResponse(responseCode = "403", description = "Recurso não permito ao perfil de CLIENTE",
+                            content = @Content(mediaType = " application/json;charset=UTF-8",
+                                    schema = @Schema(implementation = ErrorMessage.class))
+                    )
             })
     @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
@@ -125,10 +119,10 @@ public class CustomerController {
             security = @SecurityRequirement(name = "security"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Recurso recuperado com sucesso",
-                            content = @Content(mediaType = "application/json",
+                            content = @Content(mediaType = "application/json;charset=UTF-8",
                                     schema = @Schema(implementation = CustomerResponseDto.class))),
                     @ApiResponse(responseCode = "403", description = "Recurso não permitido ao perfil ADMIN",
-                            content = @Content(mediaType = "application/json",
+                            content = @Content(mediaType = "application/json;charset=UTF-8",
                                     schema = @Schema(implementation = ErrorMessage.class)))
             })
     @GetMapping("/details")

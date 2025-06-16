@@ -17,11 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j
-@RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private final JwtUserDetailsService detailsService;
+    private JwtUserDetailsService detailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -54,4 +53,20 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
+    /*
+    //teste
+    private void toAuthentication(HttpServletRequest request, String username) {
+        log.info("[JwtAuthorizationFilter] Autenticando usuário: {}", username);
+
+        UserDetails userDetails = detailsService.loadUserByUsername(username);
+        log.info("[JwtAuthorizationFilter] Authorities: {}", userDetails.getAuthorities());
+
+        UsernamePasswordAuthenticationToken authenticationToken = UsernamePasswordAuthenticationToken
+                .authenticated(userDetails, null, userDetails.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        log.info("[JwtAuthorizationFilter] Autenticação configurada no contexto");
+    }
+    */
 }

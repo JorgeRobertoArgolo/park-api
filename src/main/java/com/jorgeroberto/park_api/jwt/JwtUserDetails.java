@@ -1,10 +1,7 @@
 package com.jorgeroberto.park_api.jwt;
 
-import org.springframework.security.core.GrantedAuthority;
 import com.jorgeroberto.park_api.entities.User;
 import org.springframework.security.core.authority.AuthorityUtils;
-
-import java.util.Collection;
 
 public class JwtUserDetails extends org.springframework.security.core.userdetails.User{
 

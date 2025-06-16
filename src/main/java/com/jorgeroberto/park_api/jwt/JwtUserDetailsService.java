@@ -2,20 +2,18 @@ package com.jorgeroberto.park_api.jwt;
 
 import com.jorgeroberto.park_api.entities.User;
 import com.jorgeroberto.park_api.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 
-@Component
+@RequiredArgsConstructor
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     //Consulta pelo username do user, retorna se for encontrado. Usuário logado
     @Override

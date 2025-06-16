@@ -55,33 +55,28 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "Recurso recuperado com sucesso",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = UserResponseDto.class))),
-                    @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
+                    @ApiResponse(responseCode = "403", description = "Usuário sem permissão para acessar esse recurso",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorMessage.class))),
-                    @ApiResponse(responseCode = "403", description = "Usuário sem permissão para acessar esse recurso",
+                    @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorMessage.class)))
             })
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') OR (hasRole('CUSTOMER')) AND #id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMIN') OR ( hasRole('CUSTOMER') AND #id == authentication.principal.id)")
     public ResponseEntity<UserResponseDto> findById (@PathVariable Long id) {
         User user = userService.findById(id);
-        return ResponseEntity.ok().body(UserMapper.toDto(user));
+        return ResponseEntity.ok(UserMapper.toDto(user));
     }
 
     @Operation(summary = "Atualizar senha", description = "Atualizar senha",
             security = @SecurityRequirement(name = "security"),
             responses = {
-                    @ApiResponse(responseCode = "204", description = "Senha atualizada com sucesso",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "204", description = "Senha atualizada com sucesso"),
                     @ApiResponse(responseCode = "400", description = "Senha não confere",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorMessage.class))),
                     @ApiResponse(responseCode = "403", description = "Usuário sem permissão para acessar esse recurso",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorMessage.class))),
-                    @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorMessage.class))),
                     @ApiResponse(responseCode = "422", description = "Campos inválidos ou mal formatados",
@@ -92,11 +87,10 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER') AND (#id == authentication.principal.id)")
     public ResponseEntity<UserResponseDto> updatePassword (@PathVariable Long id, @Valid @RequestBody UserPasswordDto dto) {
         User user = userService.updatePassword(id, dto.getCurrentPassword(), dto.getNewPassword(), dto.getConfirmNewPassword());
-        //return ResponseEntity.ok(UserMapper.toDto(user));
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Recuperar todos os usuários", description = "Recuperar todos os usuários",
+    @Operation(summary = "Recuperar todos os usuários", description = "Requisição exige um Bearer Token. Acesso restrito a ADMIN",
             security = @SecurityRequirement(name = "security"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Lista com todos os usuários cadastrados",
