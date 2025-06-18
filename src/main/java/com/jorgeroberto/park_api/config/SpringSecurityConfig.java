@@ -1,8 +1,8 @@
 package com.jorgeroberto.park_api.config;
 
+import com.jorgeroberto.park_api.jwt.JwtAccessDeniedHandler;
 import com.jorgeroberto.park_api.jwt.JwtAuthenticationEntryPoint;
 import com.jorgeroberto.park_api.jwt.JwtAuthorizationFilter;
-import com.jorgeroberto.park_api.jwt.JwtUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -47,6 +47,7 @@ public class SpringSecurityConfig {
                     jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class
                 ).exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                        .accessDeniedHandler(new JwtAccessDeniedHandler())
                 ).build();
     }
 
